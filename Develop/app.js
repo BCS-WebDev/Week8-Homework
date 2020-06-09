@@ -10,20 +10,140 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 ​
 const render = require("./lib/htmlRenderer");
 ​
-​
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
+
+const baseQuestions = [
+    {   // name
+        type: "input",
+        message: "Enter an employee's name:",
+        name: "name"
+    },
+    {   // id
+        type: "input",
+        message: "Enter the employee's id:",
+        name: "id"
+    },
+    {   // email
+        type: "input",
+        message: "Enter the employee's email:",
+        name: "email"
+    },
+    {   // role
+        type: "list",
+        message: "Enter the employee's role:",
+        name: "role",
+        choices: ["Manager", "Engineer", "Intern"]
+    }
+];
+
+async function createManager({ name, id, email }) {
+    try {
+        const { officeNumber } = await inquirer.prompt({
+            type: "input",
+            message: "Enter the manager's office number:",
+            name: "officeNumber"
+        });
+
+        return new Manager(name, id, email, officeNumber);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+async function createEngineer({ name, id, email }) {
+    try {
+        const { github } = await inquirer.prompt({
+            type: "input",
+            message: "Enter the Engineers's github:",
+            name: "github"
+        });
+
+        return new Engineer(name, id, email, github);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+async function createIntern({ name, id, email }) {
+    try {
+        const { school } = await inquirer.prompt({
+            type: "input",
+            message: "Enter the intern's school:",
+            name: "school"
+        });
+
+        return new Intern(name, id, email, school);
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+async function createEmployees(team) {
+    const base = await inquirer.prompt(baseQuestions);
+    
+    switch (base.role) {
+        case "Manager":
+            const manager = createManager(base);
+            team.push(manager);
+            break;
+        case "Engineer":
+            const engineer = createEngineer(base);
+            team.push(engineer);
+            break;
+        case "Intern":
+            const intern = createIntern(base);
+            team.push(intern);
+            break;
+        default:
+            break;
+    }
+
+    await inquirer.prompt({
+        type: "confirm",
+        message: "Add another employee?",
+        name: "addAnother"
+    }).then(function({ addAnother }) {
+        if (addAnother) {
+            await createEmployees(team);
+        } else {
+            return;
+        }
+    });
+}
 ​
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
 // generate and return a block of HTML including templated divs for each employee!
-​
+
 // After you have your html, you're now ready to create an HTML file using the HTML
 // returned from the `render` function. Now write it to a file named `team.html` in the
 // `output` folder. You can use the variable `outputPath` above target this location.
 // Hint: you may need to check if the `output` folder exists and create it if it
 // does not.
+
+function confirmOrMakeDir() {
+    try {
+        fs.accessSync(OUTPUT_DIR);
+    } catch(err) {
+        fs.mkdirSync(OUTPUT_DIR);
+    }
+}
+
+async function init() {
+    const team = [];
+    await createEmployees(team);
+
+    const html = render(team);
+    confirmOrMakeDir();
+    fs.writeFile(outputPath, html, function(err){
+        if (err) { console.log("Error.") }
+        console.log("'team.html' file generated in 'output' directory.")
+    });
+}
 ​
+init();
+
 // HINT: each employee type (manager, engineer, or intern) has slightly different
 // information; write your code to ask different questions via inquirer depending on
 // employee type.
