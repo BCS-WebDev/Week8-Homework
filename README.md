@@ -1,6 +1,8 @@
 # Team Profile Generator
 BootCampSpot Web Development - Week 8 Homework
 
+![Preview](https://github.com/BCS-WebDev/Week8-Homework/blob/master/Assets/TeamProfileGenerator.gif)
+
 ## Notes on Team Profiles & CLI Applications
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Team profiles can be useful in organizing members of
 a team into a single view. These member's data can be stored into objects for quick access
